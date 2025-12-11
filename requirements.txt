@@ -1,0 +1,41 @@
+# ============================================================
+# Chest X-Ray Classification - Dependencies
+# ============================================================
+
+# ⚠️ IMPORTANT: PyTorch Installation
+# ============================================================
+# For GPU support, you MUST install PyTorch with CUDA support first!
+# DO NOT use this file directly - see INSTALL.md for instructions
+#
+# Quick GPU Install (CUDA 11.8):
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+#
+# Quick GPU Install (CUDA 12.1):
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+#
+# CPU Only:
+#   pip install torch torchvision
+# ============================================================
+
+# Core ML Libraries (install AFTER PyTorch)
+numpy>=1.24.0
+pillow>=9.5.0
+opencv-python>=4.7.0
+scikit-learn>=1.2.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Advanced models
+timm>=0.9.0
+efficientnet-pytorch>=0.7.1
+
+# Training utilities
+torchsummary>=1.5.1
+
+# API
+fastapi>=0.100.0
+uvicorn>=0.23.0
+python-multipart>=0.0.6
+
+# Optional but recommended
+tqdm>=4.65.0

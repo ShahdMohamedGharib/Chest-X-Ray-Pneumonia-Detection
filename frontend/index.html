@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تشخيص الالتهاب الرئوي من الأشعة السينية</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1>🫁 تشخيص الالتهاب الرئوي من الأشعة السينية</h1>
+            <p>نظام ذكاء اصطناعي متقدم باستخدام 5 نماذج + Simple Ensemble</p>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="container">
+            <button class="nav-btn active" data-section="prediction">التنبؤ</button>
+            <button class="nav-btn" data-section="dataset">معلومات البيانات</button>
+            <button class="nav-btn" data-section="models">النماذج</button>
+            <button class="nav-btn" data-section="about">عن المشروع</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+
+            <!-- Prediction Section -->
+            <section id="prediction" class="section active">
+                <h2>📸 رفع صورة الأشعة السينية</h2>
+
+                <div class="upload-area">
+                    <input type="file" id="imageInput" accept="image/*" hidden>
+                    <div class="upload-box" id="uploadBox">
+                        <div class="upload-icon">📤</div>
+                        <p>اضغط لرفع صورة أو اسحبها هنا</p>
+                        <p class="upload-hint">PNG, JPG, JPEG</p>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div id="results" class="results hidden">
+
+                    <!-- Images Row -->
+                    <div class="images-row">
+                        <div class="image-card">
+                            <h3>الصورة الأصلية</h3>
+                            <img id="originalImage" alt="Original">
+                        </div>
+                        <div class="image-card">
+                            <h3>بعد المعالجة (CLAHE)</h3>
+                            <img id="preprocessedImage" alt="Preprocessed">
+                        </div>
+                    </div>
+
+                    <!-- Grad-CAM for All Models -->
+                    <div class="models-grid">
+                        <h3>🔥 Grad-CAM Heatmaps لكل نموذج</h3>
+                        <div id="gradcamContainer" class="gradcam-grid"></div>
+                    </div>
+
+                    <!-- Ensemble Prediction -->
+                    <div class="ensemble-card">
+                        <h3>🎯 التنبؤ النهائي (Weighted Ensemble)</h3>
+                        <div class="prediction-result">
+                            <div class="prediction-class" id="ensembleClass">-</div>
+                            <div class="prediction-confidence" id="ensembleConfidence">-</div>
+                        </div>
+                        <div class="probabilities" id="ensembleProbabilities"></div>
+                    </div>
+
+                    <!-- Individual Models -->
+                    <div class="models-grid">
+                        <h3>📊 تنبؤات النماذج الفردية</h3>
+                        <div id="individualPredictions" class="predictions-container"></div>
+                    </div>
+
+                </div>
+
+                <!-- Loading -->
+                <div id="loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>جاري التحليل...</p>
+                </div>
+            </section>
+
+            <!-- Dataset Section -->
+            <section id="dataset" class="section">
+                <h2>📊 معلومات عن البيانات</h2>
+
+                <div class="info-card">
+                    <h3>🗂️ Dataset Overview</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>الاسم:</strong>
+                            <p>Chest X-Ray Images (Pneumonia)</p>
+                        </div>
+                        <div class="info-item">
+                            <strong>المصدر:</strong>
+                            <p>Kaggle</p>
+                        </div>
+                        <div class="info-item">
+                            <strong>الفئات:</strong>
+                            <p>NORMAL, PNEUMONIA</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>🔧 مراحل المعالجة المسبقة</h3>
+                    <ol class="processing-steps">
+                        <li>
+                            <strong>CLAHE (Contrast Limited Adaptive Histogram Equalization)</strong>
+                            <p>تحسين التباين في صور الأشعة السينية لتحسين استخراج الميزات</p>
+                        </li>
+                        <li>
+                            <strong>Resize to 224×224</strong>
+                            <p>توحيد حجم الصور لإدخالها في النماذج</p>
+                        </li>
+                        <li>
+                            <strong>Normalization</strong>
+                            <p>تطبيع قيم البكسل لتحسين التدريب</p>
+                        </li>
+                        <li>
+                            <strong>Data Augmentation</strong>
+                            <p>دوران، انعكاس، تغيير السطوع والتباين لزيادة تنوع البيانات</p>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="info-card">
+                    <h3>📈 تقسيم البيانات</h3>
+                    <div class="split-info">
+                        <div class="split-item">
+                            <div class="split-label">التدريب</div>
+                            <div class="split-bar" style="width: 80%">80%</div>
+                        </div>
+                        <div class="split-item">
+                            <div class="split-label">التحقق</div>
+                            <div class="split-bar" style="width: 20%">20%</div>
+                        </div>
+                        <div class="split-item">
+                            <div class="split-label">الاختبار</div>
+                            <div class="split-bar" style="width: 100%">Test Set منفصل</div>
+                        </div>
+                    </div>
+                    <p class="note">⚠️ <strong>ملاحظة مهمة:</strong> تم استخدام train_test_split على مجلد التدريب
+                        (80/20) بدلاً من مجلد Validation الأصلي الذي يحتوي على 16 صورة فقط. هذا التحسين رفع الدقة بشكل
+                        كبير!</p>
+                </div>
+            </section>
+
+            <!-- Models Section -->
+            <section id="models" class="section">
+                <h2>🤖 النماذج المستخدمة</h2>
+
+                <div class="model-card">
+                    <div class="model-header">
+                        <h3>1️⃣ ImprovedCNN (Enhanced)</h3>
+                        <span class="model-badge">Custom</span>
+                    </div>
+                    <p><strong>الوصف:</strong> شبكة عصبية تلافيفية محسنة بـ 4 كتل تلافيفية وبنية أعمق</p>
+                    <p><strong>المعاملات:</strong> ~8-10M</p>
+                    <p><strong>البنية:</strong> 4 Conv blocks (64→128→256→512 filters) + Enhanced classifier (1024→512→256)</p>
+                    <p><strong>الدقة المتوقعة:</strong> ~85-90%</p>
+                    <p><strong>التحسينات:</strong> استخدام augmentation قوي، Mixed Precision Training، learning rate محسّن</p>
+                </div>
+
+                <div class="model-card">
+                    <div class="model-header">
+                        <h3>2️⃣ ResNet18</h3>
+                        <span class="model-badge transfer">Transfer Learning</span>
+                    </div>
+                    <p><strong>الوصف:</strong> ResNet-18 مدرب مسبقاً على ImageNet ومُعدّل للأشعة السينية</p>
+                    <p><strong>المعاملات:</strong> ~11M</p>
+                    <p><strong>البنية:</strong> 18-layer residual network</p>
+                    <p><strong>الدقة المتوقعة:</strong> ~90%</p>
+                </div>
+
+                <div class="model-card">
+                    <div class="model-header">
+                        <h3>3️⃣ ResNet50</h3>
+                        <span class="model-badge transfer">Transfer Learning</span>
+                    </div>
+                    <p><strong>الوصف:</strong> ResNet-50 الأعمق لاستخراج ميزات أفضل</p>
+                    <p><strong>المعاملات:</strong> ~23M</p>
+                    <p><strong>البنية:</strong> 50-layer residual network</p>
+                    <p><strong>الدقة المتوقعة:</strong> ~91%</p>
+                </div>
+
+                <div class="model-card">
+                    <div class="model-header">
+                        <h3>4️⃣ DenseNet121</h3>
+                        <span class="model-badge transfer">Transfer Learning</span>
+                    </div>
+                    <p><strong>الوصف:</strong> DenseNet-121 مع اتصالات كثيفة لتدفق أفضل للتدرجات</p>
+                    <p><strong>المعاملات:</strong> ~7M</p>
+                    <p><strong>البنية:</strong> 121-layer densely connected network</p>
+                    <p><strong>الدقة المتوقعة:</strong> ~90%</p>
+                </div>
+
+                <div class="model-card">
+                    <div class="model-header">
+                        <h3>5️⃣ EfficientNet-B0</h3>
+                        <span class="model-badge transfer">Transfer Learning</span>
+                    </div>
+                    <p><strong>الوصف:</strong> EfficientNet-B0 مع تحجيم مركب فعال</p>
+                    <p><strong>المعاملات:</strong> ~4M</p>
+                    <p><strong>البنية:</strong> Efficient compound scaling</p>
+                    <p><strong>الدقة المتوقعة:</strong> ~91%</p>
+                </div>
+
+                <!-- Weighted Ensemble Card -->
+                <div class="model-card ensemble">
+                    <div class="model-header">
+                        <h3>🎯 Weighted Ensemble</h3>
+                        <span class="model-badge ensemble">Weighted Average</span>
+                    </div>
+                    <p><strong>الوصف:</strong> يجمع تنبؤات جميع النماذج الخمسة عن طريق المتوسط المرجح بناءً على دقة التحقق (Validation Accuracy) لكل نموذج</p>
+                    <p><strong>المعاملات:</strong> 0 (لا توجد معاملات إضافية)</p>
+                    <p><strong>البنية:</strong> Weighted averaging of logits من جميع النماذج</p>
+                    <p><strong>الدقة المتوقعة:</strong> ~88-92% ⭐</p>
+                    <div class="ensemble-info">
+                        <p><strong>كيف يعمل (مثل الكود الأصلي):</strong></p>
+                        <ul>
+                            <li>يأخذ تنبؤات (logits) من جميع النماذج الـ 5</li>
+                            <li>يحسب الأوزان بناءً على دقة التحقق لكل نموذج</li>
+                            <li>يُطبق المتوسط المرجح على الـ logits</li>
+                            <li>يُطبق softmax للحصول على الاحتمالات النهائية</li>
+                            <li>لا يحتاج تدريب شبكة عصبية إضافية (Meta Learning تم إلغاؤه)</li>
+                        </ul>
+                        <p style="margin-top: 15px;"><strong>الأوزان:</strong> تُحسب تلقائياً بناءً على validation accuracy لكل نموذج</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section id="about" class="section">
+                <h2>ℹ️ عن المشروع</h2>
+
+                <div class="info-card">
+                    <h3>🎯 الهدف</h3>
+                    <p>تطوير نظام ذكاء اصطناعي متقدم لتشخيص الالتهاب الرئوي من صور الأشعة السينية للصدر باستخدام تقنيات
+                        Deep Learning الحديثة.</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>✨ المميزات الرئيسية</h3>
+                    <ul>
+                        <li>✅ 5 نماذج مختلفة (Custom CNN + Transfer Learning)</li>
+                        <li>✅ Weighted Ensemble للدمج الذكي (مثل الكود الأصلي)</li>
+                        <li>✅ معالجة مسبقة متقدمة (CLAHE)</li>
+                        <li>✅ Grad-CAM لكل نموذج (5 heatmaps) لتفسير القرارات</li>
+                        <li>✅ دقة عالية (~88-89%)</li>
+                        <li>✅ واجهة سهلة الاستخدام</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h3>🔬 التقنيات المستخدمة</h3>
+                    <div class="tech-grid">
+                        <div class="tech-item">
+                            <strong>Backend:</strong>
+                            <p>FastAPI, PyTorch</p>
+                        </div>
+                        <div class="tech-item">
+                            <strong>Frontend:</strong>
+                            <p>HTML5, CSS3, JavaScript</p>
+                        </div>
+                        <div class="tech-item">
+                            <strong>Models:</strong>
+                            <p>CNN, ResNet, DenseNet, EfficientNet</p>
+                        </div>
+                        <div class="tech-item">
+                            <strong>Preprocessing:</strong>
+                            <p>CLAHE, OpenCV</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>⚠️ تنويه طبي</h3>
+                    <p class="warning">هذا النظام مخصص للأغراض التعليمية والبحثية فقط. لا يجب استخدامه كبديل للتشخيص
+                        الطبي المهني. استشر دائماً طبيباً مؤهلاً للحصول على تشخيص دقيق.</p>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 Chest X-Ray Classification | Built with ❤️ using PyTorch & FastAPI</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
